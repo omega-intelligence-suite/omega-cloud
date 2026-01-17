@@ -57,9 +57,9 @@ As a Fintech-focused project, security is not an afterthought:
 ## 🚀 Next Steps
 Once your Cloud infrastructure is live:
 
-Deploy the [OMEGA-Core](https://github.com/ayvroud/omega-core) to start syncing your balances.
+Deploy the [OMEGA-Core](https://github.com/omega-intelligence-suite/omega-core) to start syncing your balances.
 
-Launch the [OMEGA-UI](https://github.com/ayvroud/omega-ui) to visualize your path to 1M€.
+Launch the [OMEGA-UI](https://github.com/omega-intelligence-suite/omega-ui) to visualize your path to 1M€.
 
 ---
 
