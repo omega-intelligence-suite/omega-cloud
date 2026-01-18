@@ -1,67 +1,95 @@
 # ☁️ OMEGA-Cloud — The Wealth Data Foundation
 
-OMEGA Intelligence Cloud is the backbone of the OMEGA Intelligence ecosystem. It provides the secure, multi-tenant PostgreSQL infrastructure required to store financial assets, historical snapshots, and AI-driven market intelligence.
+OMEGA-Cloud is the sovereign data anchor for the OMEGA intelligence ecosystem. It provides the hardened PostgreSQL infrastructure designed for the 1M€ / 2035 accumulation trajectory.
 
-This repository contains the "Source of Truth" for your data structure, security policies, and automated database triggers.
----
-## 🏗 Architecture Overview
+## 🏗 Data Architecture
 
-OMEGA uses a **Three-Tier Architecture**:
-1. OMEGA-UI: The frontend dashboard (React).
-2. OMEGA-Core: The local engine (Python/Docker) that scrapes data and pushes it here.
-3. OMEGA-Cloud (This Repo): The persistent storage and security layer.
+OMEGA operates on a three-tier architecture:
+1. **OMEGA-UI**: Visualization dashboard (React).
+2. **OMEGA-Core**: Execution engine (Python/Docker) — The only entity authorized to write via service_role.
+3. **OMEGA-Cloud**: Persistent storage and RLS security layer (Supabase).
 
-**Core Components**:
-- **Schema**: Optimized for multi-asset tracking (Crypto, Stocks, Cash).
-- **Auth**: Managed via Supabase Auth (JWT).
-- **RLS (Row Level Security)**: Strict policies ensuring that your financial data is only accessible by you, even in a shared database environment.
-- **Triggers**: Automated logic to initialize user settings (e.g., setting the 1M€ / 2035 target upon sign-up).
+## 🚀 Deployment Guide: Step-by-Step
 
----
+### Step 1: Cloud Initialization (Orbital 1)
 
-## 🛠 Setup Instructions
-To deploy your OMEGA infrastructure, follow these steps in your Supabase project:
-1. **Create a Supabase Project**
-  - Go to Supabase.com and create a new project.
-  - Note your Project URL and service_role API key (you will need these for OMEGA-Core).
-2. **Initialize the Database**
-Navigate to the SQL Editor in your Supabase dashboard and execute the scripts located in the /migrations folder in the following order:
-  - `01_schema.sql`: Creates tables for assets, holdings, and snapshots.
-  - `02_auth_triggers.`sql: Sets up the automation that creates your default settings (1M€ goal) when you first log in.
-  - `03_rls_policies.sql`: **CRITICAL**. Enables Row Level Security to lock down your data.
-3. Configure Authentication
-  - In the Supabase Sidebar, go to Authentication > Providers.Ensure Email/Password is enabled.(Optional) Disable "Confirm Email" for a faster local setup.
+The database must be provisioned before any local execution can occur.
+1. **Project Creation:** Navigate to [Supabase.com](https://supabase.com) and create a new project.
+2. **Key Collection:** Secure your `Project URL`, your `service_role key` (for the Core), and your `anon key` (for the UI).
+3. **Auth Configuration:**
+- Go to **Authentication > Providers**.
+- Enable **Email/Password**.
+- (Optional) Disable "Confirm Email" for rapid deployment.
 
----
+### Step 2: Schema Forge (SQL)
+
+Execute the scripts in the Supabase SQL Editor in this precise order to ensure referential integrity:
+1. `01_schema.sql`: Tables for assets, holdings, and snapshots.
+2. `02_auth_triggers.sql`: Automation for default settings (1M€ Target).
+3. `03_rls_policies.sql`: CRITICAL. Row Level Security lockdown.
+
+### Step 3: Local Development Setup (Orbital 2)
+
+To maintain system stability without risking production data, use the CLI workflow:
+
+**Prerequisites:** Docker Desktop and Supabase CLI installed.
+
+```bash
+# 1. Authentication
+supabase login
+
+# 2. Link to remote project
+supabase link --project-ref [YOUR_PROJECT_REF]
+
+# 3. Launch Local Sandbox (Docker)
+# Allows testing Python scripts without affecting the cloud
+supabase start
+```
+
+
+**Local Session Info:**
+- **Local Studio:** `http://localhost:54323`
+- **Local DB Port:** `54322`
+
+## 🔒 Security Protocol: RLS
+
+OMEGA's security is predicated on the principle of **Individual Sovereignty**. Every table must strictly adhere to the following rule:
+
+```sql
+ALTER TABLE public.[table_name] ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Owner Access"
+ON public.[table_name]
+FOR ALL
+USING (auth.uid() = user_id);
+```
+
+| Role | Key Type | RLS Access | Use Case |
+| --- | --- | --- | --- |
+| Admin (Core) | `service_role` | Bypass (Superuser) | Local Raspberry Pi Sync |
+| User (UI) | `anon_key` | Strict (Restricted) | Dashboard Visualization |
+
 
 ## 📊 Data Dictionary
-| Table | Description |
-| --- | --- |
-| `assets` | Definitions of your tickers (e.g., BTC, PUST.PA). |
-| `holdings` | Current balances and average buy prices. |
-| `portfolio_snapshots` | Daily net worth records (The data source for your 2035 trajectory). |
-| `market_briefs` | AI-generated market insights. |
-| `wallet_briefs` | AI-generated wallet insights. |
-| `stocks_briefs` | AI-generated stock insights. |
-| `daily_briefs` | AI-generated daily insights. |
-| `user_settings` | Your personal variables (target_net_worth, target_year). |
----
-## 🔒 Security Principles
-As a Fintech-focused project, security is not an afterthought:
-- **Service Role Access**: Only the OMEGA-Core (running on your private hardware) should use the service_role key to write data.
-- **Anon Key Access**: The OMEGA-UI uses the anon key, which is restricted by RLS. It can only "see" data belonging to the currently logged-in user.
-- **Cascading Deletes**: If you delete your account, all associated financial history is purged instantly from the tables.
 
----
+Table | Analytical Function |
+--- | --- |
+| `user_assets` | Registry of tickers and metadata (BTC, ETH, etc.). |
+| holdings | Inventory of positions and cost basis (PRU). |
+| `portfolio_snapshots` | Net Worth history (Primary source for 2035 calculation). |
+| `market_briefs` | LLM-generated intelligence reports. |
+| `user_settings` | Target variables (Target net worth, target year). |
 
-## 🚀 Next Steps
+## 🛠 Maintenance & Migrations
+
+Never modify the schema directly in production. Follow the migration cycle:
+1. **Pull**: Capture current cloud state (supabase db pull).
+2. **Edit**: Create a new migration (supabase migration new my_change).
+3. **Test**: Apply locally via Docker.
+4. **Push**: Deploy to production (supabase db push).
+
+## Next Steps
+
 Once your Cloud infrastructure is live:
-
-Deploy the [OMEGA-Core](https://github.com/omega-intelligence-suite/omega-core) to start syncing your balances.
-
-Launch the [OMEGA-UI](https://github.com/omega-intelligence-suite/omega-ui) to visualize your path to 1M€.
-
----
-
-## 🛠 Final Note
-Do not skip the RLS (03_rls_policies.sql) step. In the world of finance, data privacy is the only alpha that truly matters.
+- Deploy the [OMEGA-Core](https://github.com/omega-intelligence-suite/omega-core) to sync your first balances.
+- Deploy the [OMEGA-UI](https://github.com/omega-intelligence-suite/omega-ui) to visualize your trajectory.
