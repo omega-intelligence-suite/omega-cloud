@@ -17,9 +17,9 @@ The database must be provisioned before any local execution can occur.
 1. **Project Creation:** Navigate to [Supabase.com](https://supabase.com) and create a new project.
 2. **Key Collection:** Secure your `Project URL`, your `service_role key` (for the Core), and your `anon key` (for the UI).
 3. **Auth Configuration:**
-- Go to **Authentication > Providers**.
-- Enable **Email/Password**.
-- (Optional) Disable "Confirm Email" for rapid deployment.
+   - Go to **Authentication > Providers**.
+   - Enable **Email/Password**.
+   - (Optional) Disable "Confirm Email" for rapid deployment.
 
 ### Step 2: Schema Forge (SQL)
 
